@@ -44,7 +44,8 @@ struct BusinessListCell: View {
 }
 
 struct BusinessListView: View {
-    let data = Gen<BusinessCard> { ctx in
+    private let random: Bool
+    private let businessCardGen = Gen<BusinessCard> { ctx in
         let addressLine2Gen = Gen<String>.one(of: [
             Fake.Addresses.caLastLine,
             Fake.Addresses.usLastLine
@@ -59,7 +60,14 @@ struct BusinessListView: View {
             addressLine1: Fake.Addresses.streetLine.generate(context: ctx),
             addressLine2: addressLine2Gen.generate(context: ctx)
         )
-    }.take(count: 50)
+    }
+
+    @State var context: Context = .default
+    @State var data: [BusinessCard] = []
+
+    init(random: Bool = false) {
+        self.random = random
+    }
     
     var body: some View {
         List {
@@ -68,6 +76,10 @@ struct BusinessListView: View {
             }
         }
         .navigationTitle("Business Cards")
+        .onAppear {
+            context = random ? .random : .default
+            data = businessCardGen.take(count: 50, context: context)
+        }
     }
 }
 

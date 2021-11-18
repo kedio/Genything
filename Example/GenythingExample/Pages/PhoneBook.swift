@@ -22,7 +22,20 @@ struct PhoneBookCell: View {
 }
 
 struct PhoneBook: View {
-    let data = Gen.zip(Fake.PersonNames.full, Fake.PhoneNumbers.formatted) {Contact(name: $0, phoneNumber: $1)}.samples(count: 50)
+    private let random: Bool
+    private let contactGen = Gen.zip(
+        Fake.PersonNames.full,
+        Fake.PhoneNumbers.formatted
+    ) {
+        Contact(name: $0, phoneNumber: $1)
+    }
+
+    @State var context: Context = .default
+    @State var data: [Contact] = []
+
+    init(random: Bool = false) {
+        self.random = random
+    }
     
     var body: some View {
         List {
@@ -31,6 +44,10 @@ struct PhoneBook: View {
             }
         }
         .navigationTitle("Contacts")
+        .onAppear {
+            context = random ? .random : .default
+            data = contactGen.take(count: 50, context: context)
+        }
     }
 }
 
